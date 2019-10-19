@@ -20,12 +20,14 @@ void server_epoll(int serverfd)
 		perror("Epoll Add serverfd Fail:");
 		return;
 	}
+	setNonBlocking(serverfd);	//配置非阻塞模式
 	event.data.fd=STDIN_FILENO;
 	if(epoll_ctl(epollfd, EPOLL_CTL_ADD, STDIN_FILENO, &event) < 0)
 	{
 		perror("Epoll Add STDIN_FILENO Fail:");
 		return;
 	}
+	setNonBlocking(STDIN_FILENO);
 	//epoll
 	while(1)
 	{
@@ -98,12 +100,21 @@ void server_epoll(int serverfd)
 					continue;
 				}
 				show_info(clientfd);
-				//将新建立的连接添加到EPOLL的监听中
-				struct epoll_event event_;
-				event_.data.fd = clientfd;
-				event_.events =  EPOLLIN|EPOLLET;
-				epoll_ctl(epollfd, EPOLL_CTL_ADD, clientfd, &event_);
-				clientfds.push_back(clientfd);		//
+				if(clientfds.size()>=(MAXCN-2))
+				{
+					fprintf(stderr,"connfd size over %d\n",MAXCN);
+					close(clientfd);
+				}
+				else
+				{
+					//将新建立的连接添加到EPOLL的监听中
+					struct epoll_event event_;
+					event_.data.fd = clientfd;
+					event_.events =  EPOLLIN|EPOLLET;
+					epoll_ctl(epollfd, EPOLL_CTL_ADD, clientfd, &event_);
+					setNonBlocking(clientfd);	//配置非阻塞模式
+					clientfds.push_back(clientfd);		//
+				}
 			}
 			else
 			{

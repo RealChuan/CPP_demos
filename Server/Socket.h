@@ -9,26 +9,11 @@
 #include <arpa/inet.h>
 #include <netinet/tcp.h>
 #include <unistd.h>
+#include <fcntl.h>
 
 using namespace std;
 
 #define port 8888
-
-void show_info(int connfd)
-{
-	//	struct sockaddr_in serveraddr;
-	//	bzero(&serveraddr,sizeof(serveraddr));
-	//	socklen_t serveraddr_len = sizeof(serveraddr);
-	//	getsockname(connfd,reinterpret_cast<struct sockaddr*>(&serveraddr),&serveraddr_len);
-	//	//cout<<"serveraddr "<<inet_ntoa(serveraddr.sin_addr)<<":"<<ntohs(serveraddr.sin_port)<<endl;
-	//	printf("serveraddr %s:%d\n",inet_ntoa(serveraddr.sin_addr),ntohs(serveraddr.sin_port));
-
-	struct sockaddr_in peer_addr;
-	bzero(&peer_addr,sizeof(peer_addr));
-	socklen_t peer_addr_len = sizeof(peer_addr);
-	getpeername(connfd,reinterpret_cast<struct sockaddr*>(&peer_addr),&peer_addr_len);
-	printf("客户端 clientaddr %s:%d\n",inet_ntoa(peer_addr.sin_addr),ntohs(peer_addr.sin_port));
-}
 
 int socketListenBind()
 {
@@ -86,6 +71,45 @@ int server_accept(int serverfd)
 						  &addrlen);
 	return clientfd;
 }
+
+//通过fd得到ip和port
+void show_info(int connfd)
+{
+	//	struct sockaddr_in serveraddr;
+	//	bzero(&serveraddr,sizeof(serveraddr));
+	//	socklen_t serveraddr_len = sizeof(serveraddr);
+	//	getsockname(connfd,reinterpret_cast<struct sockaddr*>(&serveraddr),&serveraddr_len);
+	//	//cout<<"serveraddr "<<inet_ntoa(serveraddr.sin_addr)<<":"<<ntohs(serveraddr.sin_port)<<endl;
+	//	printf("serveraddr %s:%d\n",inet_ntoa(serveraddr.sin_addr),ntohs(serveraddr.sin_port));
+
+	struct sockaddr_in peer_addr;
+	bzero(&peer_addr,sizeof(peer_addr));
+	socklen_t peer_addr_len = sizeof(peer_addr);
+	getpeername(connfd,reinterpret_cast<struct sockaddr*>(&peer_addr),&peer_addr_len);
+	printf("客户端 clientaddr %s:%d\n",inet_ntoa(peer_addr.sin_addr),ntohs(peer_addr.sin_port));
+}
+
+/*----------------------------------------------------------/
+/对文件描述符的操作必须先使用									/
+/int flags=fcntl(fd,F_GETFL,0)获取当前描述符的属性，			/
+/然后在此基础上添加或者删除，否则会删除之前的属性（本来可能有多个属性）	/
+/----------------------------------------------------------*/
+//配置非阻塞模式
+void setNonBlocking(int fd)
+{
+	int flags=fcntl(fd,F_GETFL,0);
+	flags |=O_NONBLOCK;
+	fcntl(fd,F_SETFL,flags);
+}
+
+//配置为阻塞模式
+void setBlock(int fd)
+{
+	int flags=fcntl(fd,F_GETFL,0);
+	flags &=~O_NONBLOCK;
+	fcntl(fd,F_SETFL,flags);
+}
+
 
 
 #endif // SOCKET_H

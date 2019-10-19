@@ -7,6 +7,7 @@
 #include <arpa/inet.h>      //inet_ntoa
 #include <stdlib.h>         //exit()
 #include <unistd.h>
+#include <fcntl.h>
 
 using namespace std;
 
@@ -16,6 +17,14 @@ using namespace std;
 #define quit "quit"     //关闭命令
 
 static int sockfd;
+
+//配置非阻塞模式
+void setNonBlocking(int fd)
+{
+	int flags=fcntl(fd,F_GETFL,0);
+	flags |=O_NONBLOCK;
+	fcntl(fd,F_SETFL,flags);
+}
 
 int connecttoserver()
 {
@@ -47,6 +56,7 @@ int connecttoserver()
 			break;
 	}
 	cout<<"服务器连接成功:"<<sockfd<<endl;
+	setNonBlocking(sockfd);
 	return sockfd;
 }
 

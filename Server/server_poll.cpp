@@ -24,6 +24,9 @@ void pollServer(int serverfd)
 	pollfds[0].events = READ_ONLY; // 普通或优先级带数据可读
 	pollfds[1].events = READ_ONLY; // 普通或优先级带数据可读POLLIN
 
+	setNonBlocking(STDIN_FILENO);//配置非阻塞模式
+	setNonBlocking(serverfd);
+
 	int timeout = 30000; /* 设定3秒后超时 */
 
 	int maxfd=1;
@@ -90,6 +93,7 @@ void pollServer(int serverfd)
 				perror("accept error:");
 				continue;
 			}
+			show_info(clientfd);
 			//添加新的fd 到数组中 判断有效的连接数是否小于最大的连接数，如果小于的话，就把新的连接套接字加入集合
 			if(maxfd >= MAXCN)
 			{
@@ -98,13 +102,13 @@ void pollServer(int serverfd)
 			}
 			else
 			{
-				show_info(clientfd);
 				for(i=2; i<MAXCN; i++)
 				{
 					if(pollfds[i].fd < 0)
 					{
 						pollfds[i].fd = clientfd;
 						pollfds[i].events = READ_ONLY;
+						setNonBlocking(clientfd);	//配置非阻塞模式
 						printf("client[%d]=%d\n",i,clientfd);
 						break;
 					}

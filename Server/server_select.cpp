@@ -13,6 +13,9 @@ void selectServer(int serverfd)
 	tv.tv_sec = 30;//最多等待30秒
 	tv.tv_usec = 0;
 
+	setNonBlocking(serverfd);	//配置非阻塞模式
+	setNonBlocking(STDIN_FILENO);
+
 	while (1)
 	{
 		//初始化文件描述符集合
@@ -49,6 +52,7 @@ void selectServer(int serverfd)
 				perror("accept error:");
 				continue;
 			}
+			show_info(clientfd);
 			//添加新的fd 到数组中 判断有效的连接数是否小于最大的连接数，如果小于的话，就把新的连接套接字加入集合
 			if(count+1 > MAXCN)
 			{
@@ -59,7 +63,7 @@ void selectServer(int serverfd)
 			{
 				sockfd[count++] = clientfd;
 				maxfd = max(clientfd,maxfd)+1;
-				show_info(clientfd);
+				setNonBlocking(clientfd);	//配置非阻塞模式
 			}
 		}
 		//循环判断有效的连接是否有数据到达
