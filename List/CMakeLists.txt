@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
 
-project(Crc LANGUAGES CXX)
+project(List LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -13,4 +13,4 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -march=native -O3" )
 #SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)  #源文件目录
 SET(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin)     #输出文件目录
 
-add_executable(Crc crc_modbus.cpp)
+add_executable(List list_single.cpp)
