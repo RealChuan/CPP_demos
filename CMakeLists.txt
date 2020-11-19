@@ -12,12 +12,26 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O2 -DNDEBUG")
 #设置编译选项
 set(CXX_FLAGS
     -g
+    # -DVALGRIND
     -DCHECK_PTHREAD_RETURN_VALUE
     -D_FILE_OFFSET_BITS=64
-    -std=c++11
+    -Wall
+    # -Wextra
+    # -Werror
+    # -Wconversion
+    # -Wno-unused-parameter
+    # -Wold-style-cast
+    # -Woverloaded-virtual
+    # -Wpointer-arith
+    # -Wshadow
+    # -Wwrite-strings
     -march=native
-#    -O3
+    # -MMD
+    -std=c++17
+    -rdynamic
     )
+
+string(REPLACE ";" " " CMAKE_CXX_FLAGS "${CXX_FLAGS}")
 
 #设定可执行二进制文件的目录
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)  #源文件目录
@@ -35,11 +49,12 @@ string(TOUPPER ${CMAKE_BUILD_TYPE} BUILD_TYPE)
 message(STATUS "CXX_FLAGS = " ${CMAKE_CXX_FLAGS} " " ${CMAKE_CXX_FLAGS_${BUILD_TYPE}})
 
 #增加子文件夹(注意我们的src路径是通过子文件夹的形式添加的，在这里面也是可以写CMakeLists.txt的)
-ADD_SUBDIRECTORY(${PROJECT_SOURCE_DIR}/Sql)
-ADD_SUBDIRECTORY(${PROJECT_SOURCE_DIR}/Process)
-ADD_SUBDIRECTORY(${PROJECT_SOURCE_DIR}/List)
-ADD_SUBDIRECTORY(${PROJECT_SOURCE_DIR}/Server)
-ADD_SUBDIRECTORY(${PROJECT_SOURCE_DIR}/Client)
-ADD_SUBDIRECTORY(${PROJECT_SOURCE_DIR}/Crc)
 ADD_SUBDIRECTORY(${PROJECT_SOURCE_DIR}/Algorithms)
+ADD_SUBDIRECTORY(${PROJECT_SOURCE_DIR}/Client)
+ADD_SUBDIRECTORY(${PROJECT_SOURCE_DIR}/CrashHandler)
+ADD_SUBDIRECTORY(${PROJECT_SOURCE_DIR}/Crc)
+ADD_SUBDIRECTORY(${PROJECT_SOURCE_DIR}/List)
+ADD_SUBDIRECTORY(${PROJECT_SOURCE_DIR}/Process)
+ADD_SUBDIRECTORY(${PROJECT_SOURCE_DIR}/Server)
+ADD_SUBDIRECTORY(${PROJECT_SOURCE_DIR}/WatchDirectory)
 
