@@ -16,18 +16,18 @@ set(CXX_FLAGS
     -DCHECK_PTHREAD_RETURN_VALUE
     -D_FILE_OFFSET_BITS=64
     -Wall
-    # -Wextra
-    # -Werror
+    -Wextra
+    -Werror
     # -Wconversion
-    # -Wno-unused-parameter
+    -Wno-unused-parameter
     # -Wold-style-cast
-    # -Woverloaded-virtual
-    # -Wpointer-arith
-    # -Wshadow
-    # -Wwrite-strings
+    -Woverloaded-virtual
+    -Wpointer-arith
+    -Wshadow
+    -Wwrite-strings
     -march=native
-    # -MMD
-    -std=c++17
+    -MMD
+    -std=c++11
     -rdynamic
     )
 
@@ -48,13 +48,29 @@ LINK_DIRECTORIES(${PROJECT_SOURCE_DIR}/lib)
 string(TOUPPER ${CMAKE_BUILD_TYPE} BUILD_TYPE)
 message(STATUS "CXX_FLAGS = " ${CMAKE_CXX_FLAGS} " " ${CMAKE_CXX_FLAGS_${BUILD_TYPE}})
 
+include_directories( ${PROJECT_SOURCE_DIR} )
+
+if (CMAKE_HOST_WIN32)
+    set(WINDOWS 1)
+elseif (CMAKE_HOST_APPLE)
+    set(MACOS 1)
+elseif (CMAKE_HOST_UNIX)
+    set(LINUX 1)
+endif ()
+
 #增加子文件夹(注意我们的src路径是通过子文件夹的形式添加的，在这里面也是可以写CMakeLists.txt的)
 ADD_SUBDIRECTORY(${PROJECT_SOURCE_DIR}/Algorithms)
-ADD_SUBDIRECTORY(${PROJECT_SOURCE_DIR}/Client)
-ADD_SUBDIRECTORY(${PROJECT_SOURCE_DIR}/CrashHandler)
 ADD_SUBDIRECTORY(${PROJECT_SOURCE_DIR}/Crc)
 ADD_SUBDIRECTORY(${PROJECT_SOURCE_DIR}/List)
-ADD_SUBDIRECTORY(${PROJECT_SOURCE_DIR}/Process)
-ADD_SUBDIRECTORY(${PROJECT_SOURCE_DIR}/Server)
-ADD_SUBDIRECTORY(${PROJECT_SOURCE_DIR}/WatchDirectory)
 
+IF (WINDOWS)
+	MESSAGE(STATUS "Now is windows。")
+    ADD_SUBDIRECTORY(${PROJECT_SOURCE_DIR}/CrashHandler)
+    ADD_SUBDIRECTORY(${PROJECT_SOURCE_DIR}/WatchDirectory)
+ELSEIF (LINUX)
+	MESSAGE(STATUS "Now is LINUX.")
+    ADD_SUBDIRECTORY(${PROJECT_SOURCE_DIR}/Client)
+    ADD_SUBDIRECTORY(${PROJECT_SOURCE_DIR}/Icmp)
+    ADD_SUBDIRECTORY(${PROJECT_SOURCE_DIR}/Process)
+    ADD_SUBDIRECTORY(${PROJECT_SOURCE_DIR}/Server)
+ENDIF ()

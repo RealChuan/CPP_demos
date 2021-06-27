@@ -1,11 +1,11 @@
 #include <iostream>
-#include <stdio.h>          //perror
+#include <stdio.h> //perror
 #include <pthread.h>
-#include <sys/socket.h>     //socket()
-#include <netinet/in.h>     //sockaddr_in
+#include <sys/socket.h> //socket()
+#include <netinet/in.h> //sockaddr_in
 #include <string.h>
-#include <arpa/inet.h>      //inet_ntoa
-#include <stdlib.h>         //exit()
+#include <arpa/inet.h> //inet_ntoa
+#include <stdlib.h>	   //exit()
 #include <unistd.h>
 #include <fcntl.h>
 
@@ -14,25 +14,26 @@ using namespace std;
 #define ip "0.0.0.0"
 #define port 8888
 #define maxsize 1024
-#define quit "quit"     //关闭命令
+#define quit "quit" //关闭命令
 
 static int sockfd;
 
 //配置非阻塞模式
 void setNonBlocking(int fd)
 {
-	int flags=fcntl(fd,F_GETFL,0);
-	flags |=O_NONBLOCK;
-	fcntl(fd,F_SETFL,flags);
+	int flags = fcntl(fd, F_GETFL, 0);
+	flags |= O_NONBLOCK;
+	fcntl(fd, F_SETFL, flags);
 }
 
 int connecttoserver()
 {
 	struct sockaddr_in clIentaAddr;
 
-	while(1)
+	while (1)
 	{
-		if ((sockfd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP))==-1) {
+		if ((sockfd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)) == -1)
+		{
 			perror("sockfd failed!");
 			continue;
 		}
@@ -43,9 +44,9 @@ int connecttoserver()
 		//inet_pton(AF_INET, ip, &clientsock.sin_addr.s_addr);
 		clIentaAddr.sin_addr.s_addr = inet_addr(ip);
 
-		cout<<inet_ntoa(clIentaAddr.sin_addr)<<":"<<clIentaAddr.sin_port<<endl;
+		cout << inet_ntoa(clIentaAddr.sin_addr) << ":" << clIentaAddr.sin_port << endl;
 
-		if ((connect(sockfd, reinterpret_cast<struct sockaddr*>(&clIentaAddr), sizeof (clIentaAddr)))== -1)
+		if ((connect(sockfd, reinterpret_cast<struct sockaddr *>(&clIentaAddr), sizeof(clIentaAddr))) == -1)
 		{
 			perror("connect failed!");
 			close(sockfd);
@@ -55,55 +56,54 @@ int connecttoserver()
 		else
 			break;
 	}
-	cout<<"服务器连接成功:"<<sockfd<<endl;
+	cout << "服务器连接成功:" << sockfd << endl;
 	setNonBlocking(sockfd);
 	return sockfd;
 }
 
-void *readdata(void*)
+void *readdata(void *)
 {
 	char readbuf[maxsize];
 	fd_set fds;
 	struct timeval tv;
 
-	tv.tv_sec = 1;      //5s超时设置
+	tv.tv_sec = 30; //5s超时设置
 	tv.tv_usec = 0;
 
-	while(1)
+	while (1)
 	{
-		FD_ZERO(&fds);          //每次循环都要清空集合，否则不能检测描述符变化
-		FD_SET(sockfd,&fds);    //添加描述符
-		FD_SET(sockfd,&fds);    //同上
-		ssize_t ret=select(sockfd+1,&fds,nullptr,nullptr,&tv);
+		FD_ZERO(&fds);		  //每次循环都要清空集合，否则不能检测描述符变化
+		FD_SET(sockfd, &fds); //添加描述符
+		ssize_t ret = select(sockfd + 1, &fds, nullptr, nullptr, &tv);
 		//cout<<"z="<<z<<endl;
-		if(ret==-1)
+		if (ret == -1)
 		{
 			//perror("select error:");
 			break;
 		}
-		else if(FD_ISSET(sockfd,&fds))
+		else if (FD_ISSET(sockfd, &fds))
 		{
-			memset(readbuf,0,sizeof(readbuf));
-			ssize_t nread=recv(sockfd,readbuf,sizeof(readbuf),0);
+			memset(readbuf, 0, sizeof(readbuf));
+			ssize_t nread = recv(sockfd, readbuf, sizeof(readbuf), 0);
 			//cout<<"read"<<nread<<endl;
-			if(nread==0)
+			if (nread == 0)
 			{
-				if(sockfd)
+				if (sockfd)
 				{
-					cout<<"服务端关闭\n关闭客户端"<<endl;
+					cout << "服务端关闭\n关闭客户端" << endl;
 					close(sockfd);
 				}
 				exit(1);
 			}
-			if(nread<0)
+			if (nread < 0)
 			{
-				if(sockfd)
+				if (sockfd)
 					close(sockfd);
 				exit(-1);
 				//sockfd=connecttoserver();   //重连
 			}
-			else if(nread>0)
-				cout<<"服务端："<<readbuf<<endl;
+			else if (nread > 0)
+				cout << "服务端：" << readbuf << endl;
 		}
 	}
 	//cout<<"close accept:"<<sockfd<<endl;
@@ -112,42 +112,42 @@ void *readdata(void*)
 	return nullptr;
 }
 
-void *senddata(void*)
+void *senddata(void *)
 {
 	fd_set fds;
 	char buf[maxsize];
-	ssize_t nsend=0;
-	nsend=send(sockfd,"hello server",strlen("hello server"),0);
-	if(nsend<=0)
+	ssize_t nsend = 0;
+	nsend = send(sockfd, "hello server", strlen("hello server"), 0);
+	if (nsend <= 0)
 		exit(1);
-	while(1)
+	while (1)
 	{
-		FD_ZERO(&fds);          //每次循环都要清空集合，否则不能检测描述符变化
-		FD_SET(STDIN_FILENO,&fds);
-		if(FD_ISSET(STDIN_FILENO,&fds))
+		FD_ZERO(&fds); //每次循环都要清空集合，否则不能检测描述符变化
+		FD_SET(STDIN_FILENO, &fds);
+		if (FD_ISSET(STDIN_FILENO, &fds))
 		{
-			memset(buf,0,sizeof(buf));
-			if(fgets(buf,maxsize,stdin) == nullptr )
+			memset(buf, 0, sizeof(buf));
+			if (fgets(buf, maxsize, stdin) == nullptr)
 			{
 				printf("End...\n");
 				exit(EXIT_FAILURE);
 			}
 			else
 			{
-				buf[strlen(buf)-1] = '\0';		//减一的原因是不要回车字符
+				buf[strlen(buf) - 1] = '\0'; //减一的原因是不要回车字符
 				//经验值：这一步非常重要的哦！！！！！！！！
-				if(strcmp(buf,quit) == 0 )
+				if (strcmp(buf, quit) == 0)
 				{
-					cout<<"Quit command!"<<endl;
-					break;//关闭客户端
-					//exit(1);//关闭服务端
+					cout << "Quit command!" << endl;
+					break; //关闭客户端
+						   //exit(1);//关闭服务端
 				}
-				send(sockfd,buf,strlen(buf),0);
+				send(sockfd, buf, strlen(buf), 0);
 			}
 		}
 	}
-	cout<<"客户端关闭"<<endl;
-	if(sockfd)
+	cout << "客户端关闭" << endl;
+	if (sockfd)
 		close(sockfd);
 	return nullptr;
 }
@@ -156,23 +156,23 @@ int main()
 {
 	connecttoserver();
 
-	pthread_t t1,t2;
-	if(pthread_create(&t1,nullptr,readdata,nullptr))
+	pthread_t t1, t2;
+	if (pthread_create(&t1, nullptr, readdata, nullptr))
 	{
 		perror("readthread error:");
 		return -1;
 	}
-	if(pthread_create(&t2,nullptr,senddata,nullptr))
+	if (pthread_create(&t2, nullptr, senddata, nullptr))
 	{
 		perror("sendthread error:");
 		return -1;
 	}
-	if(pthread_join(t1,nullptr)==-1)
+	if (pthread_join(t1, nullptr) == -1)
 	{
 		perror("readjoin error");
 		return -1;
 	}
-	if(pthread_join(t2,nullptr)==-1)
+	if (pthread_join(t2, nullptr) == -1)
 	{
 		perror("sendjoin error");
 		return -1;

@@ -19,15 +19,6 @@ enum CRCModel{ CRC_8, CRC_8_ITU, CRC_8_ROHC, CRC_8_MAXIM,
                CRC_32, CRC_32_MPEG2
              };
 
-static const char *CRC_MODEL[] = { "CRC_8", "CRC_8_ITU", "CRC_8_ROHC", "CRC_8_MAXIM",
-
-                                   "CRC_16_IBM", "CRC_16_MAXIM", "CRC_16_USB",
-                                   "CRC_16_MODBUS", "CRC_16_CCITT", "CRC_16_CCITT_FALSE",
-                                   "CRC_16_x25", "CRC_16_XMODEM", "CRC_16_DNP",
-
-                                   "CRC_32", "CRC_32_MPEG2"
-                                 };
-
 static const int CRC_MODEL_SIZE = int(CRC_32_MPEG2) + 1;
 
 /**
